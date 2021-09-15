@@ -1,0 +1,81 @@
+function stegräknare () {
+    basic.showNumber(steg)
+}
+input.onButtonPressed(Button.A, function () {
+    if (mode > 0) {
+        mode += -1
+    } else {
+        mode = 3
+    }
+})
+function klocka () {
+    TidIMinuter = TidIMinuterVidStart + control.millis() / 60000
+    TidIText = convertToText(Math.round(TidIMinuter / 60))
+    if (TidIText.length < 2) {
+        TidIText = "0" + TidIText
+    }
+    TidIText = "" + TidIText + ":"
+    if (convertToText(Math.round(TidIMinuter % 60)).length < 2) {
+        TidIText = "" + TidIText + "0" + convertToText(Math.round(TidIMinuter % 60))
+    } else {
+        TidIText = "" + TidIText + convertToText(Math.round(TidIMinuter % 60))
+    }
+    basic.showString(TidIText)
+}
+input.onButtonPressed(Button.AB, function () {
+    let läge = ""
+    if (läge == "stegräknare") {
+        steg = 0
+    }
+})
+function distance () {
+    if (radio.receivedPacket(RadioPacketProperty.SignalStrength) > -70) {
+        music.playTone(262, music.beat(BeatFraction.Whole))
+        basic.showIcon(IconNames.Angry)
+        basic.clearScreen()
+    }
+}
+input.onButtonPressed(Button.B, function () {
+    if (mode < 3) {
+        mode += 1
+    } else {
+        mode = 0
+    }
+})
+function temperature () {
+    basic.showNumber(input.temperature())
+    basic.pause(100)
+    if (input.temperature() > 37) {
+        basic.showIcon(IconNames.Angry)
+    } else {
+        basic.showIcon(IconNames.Happy)
+    }
+}
+let TidIText = ""
+let TidIMinuter = 0
+let TidIMinuterVidStart = 0
+let steg = 0
+let mode = 0
+radio.setGroup(65)
+radio.setTransmitPower(4)
+mode = 0
+steg = 0
+TidIMinuterVidStart = 9 * 60 + 24
+TidIMinuter = TidIMinuterVidStart
+basic.forever(function () {
+    radio.sendNumber(0)
+    basic.pause(200)
+    if (input.acceleration(Dimension.Strength) > 1500) {
+        steg += 1
+        basic.pause(500)
+    }
+    if (mode == 0) {
+        distance()
+    } else if (mode == 1) {
+        temperature()
+    } else if (mode == 2) {
+        stegräknare()
+    } else if (mode == 3) {
+        klocka()
+    }
+})
